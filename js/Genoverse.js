@@ -436,7 +436,7 @@ const Genoverse = Base.extend({
       axis   : 'y',
       helper : 'clone',
       cursor : 'move',
-      update : $.proxy(this.updateTrackOrder, this),
+      update : this.updateTrackOrder.bind(this),
       start  : function (e, ui) {
         ui.placeholder.css({ height: ui.item.height(), visibility: 'visible' }).html(ui.item.html());
         ui.helper.hide();
@@ -554,10 +554,10 @@ const Genoverse = Base.extend({
       }
     });
 
-    documentEvents['mouseup'    + this.eventNamespace] = $.proxy(this.mouseup,   this);
-    documentEvents['mousemove'  + this.eventNamespace] = $.proxy(this.mousemove, this);
-    documentEvents['keydown'    + this.eventNamespace] = $.proxy(this.keydown,   this);
-    documentEvents['keyup'      + this.eventNamespace] = $.proxy(this.keyup,     this);
+    documentEvents['mouseup'    + this.eventNamespace] = this.mouseup.bind(this);
+    documentEvents['mousemove'  + this.eventNamespace] = this.mousemove.bind(this);
+    documentEvents['keydown'    + this.eventNamespace] = this.keydown.bind(this);
+    documentEvents['keyup'      + this.eventNamespace] = this.keyup.bind(this);
     documentEvents['mousewheel' + this.eventNamespace] = function (e) {
       if (browser.wheelAction === 'zoom') {
         if (browser.wheelTimeout) {
@@ -570,7 +570,7 @@ const Genoverse = Base.extend({
     };
 
     $(document).on(documentEvents);
-    $(window).on((this.useHash ? 'hashchange' : 'popstate') + this.eventNamespace, $.proxy(this.popState, this));
+    $(window).on((this.useHash ? 'hashchange' : 'popstate') + this.eventNamespace, this.popState.bind(this));
   },
 
   onTracks: function () {
@@ -1071,8 +1071,8 @@ const Genoverse = Base.extend({
     }
 
     var sorted     = $.extend([], this.tracks).sort(function (a, b) { return a.order - b.order; });
-    var labels     = $();
-    var containers = $();
+    var labels     = [];
+    var containers = [];
     var container;
 
     for (var i = 0; i < sorted.length; i++) {
@@ -1100,7 +1100,7 @@ const Genoverse = Base.extend({
     // Correct the order
     this.tracks = sorted;
 
-    labels.map(function () { return $(this).data('track'); }).each(function () {
+    $(labels).map(function () { return $(this).data('track'); }).each(function () {
       if (this.prop('menus').length) {
         var diff = (this.prop('superContainer') || this.prop('container')).position().top - this.prop('top');
         this.prop('menus').css('top', function (j, top) { return parseInt(top, 10) + diff; });
